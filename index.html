@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>स्वास्थ्य साथी - ASHA Worker Assistant</title>
+    <meta name="description" content="Vernacular Voice Assistant for ASHA Workers">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" id="menuToggle" aria-label="मेनू खोलें">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+                <span class="logo-text">स्वास्थ्य साथी</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <select class="language-toggle" id="languageToggle" aria-label="भाषा चुनें">
+                <option value="hi">हिंदी</option>
+                <option value="en">English</option>
+            </select>
+            <button class="icon-btn notification-btn" id="notificationBtn" aria-label="सूचनाएं">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+                <span class="notification-badge">3</span>
+            </button>
+            <button class="icon-btn profile-btn" id="profileBtn" aria-label="प्रोफ़ाइल">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+            <a href="#dashboard" class="nav-item active" data-module="dashboard">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                <span>डैशबोर्ड</span>
+            </a>
+            <a href="#add-patient" class="nav-item" data-module="add-patient">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="8.5" cy="7" r="4"></circle>
+                    <line x1="20" y1="8" x2="20" y2="14"></line>
+                    <line x1="23" y1="11" x2="17" y2="11"></line>
+                </svg>
+                <span>मरीज जोड़ें</span>
+            </a>
+            <a href="#search-patient" class="nav-item" data-module="search-patient">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <span>मरीज खोजें</span>
+            </a>
+            <a href="#calendar" class="nav-item" data-module="calendar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span>कैलेंडर</span>
+            </a>
+            <a href="#high-risk" class="nav-item" data-module="high-risk">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+                <span>उच्च जोखिम मरीज</span>
+            </a>
+            <a href="#insurance" class="nav-item" data-module="insurance">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <span>बीमा</span>
+            </a>
+            <a href="#communication" class="nav-item" data-module="communication">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>संचार</span>
+            </a>
+            <a href="#transport" class="nav-item" data-module="transport">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="1" y="6" width="22" height="12" rx="2"></rect>
+                    <circle cx="6" cy="18" r="2"></circle>
+                    <circle cx="18" cy="18" r="2"></circle>
+                </svg>
+                <span>परिवहन</span>
+            </a>
+            <a href="#health-coach" class="nav-item" data-module="health-coach">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                </svg>
+                <span>स्वास्थ्य कोच</span>
+            </a>
+            <a href="#reports" class="nav-item" data-module="reports">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                <span>रिपोर्ट</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <!-- Dashboard Module -->
+        <section class="module active" id="dashboard">
+            <h1 class="module-title">डैशबोर्ड</h1>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon primary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="totalPatients">0</div>
+                        <div class="stat-label">कुल मरीज</div>
+                    </div>
+                </div>
+
+                <div class="stat-card danger">
+                    <div class="stat-icon danger">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="highRiskPatients">0</div>
+                        <div class="stat-label">उच्च जोखिम मरीज</div>
+                    </div>
+                </div>
+
+                <div class="stat-card warning">
+                    <div class="stat-icon warning">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="todayFollowups">0</div>
+                        <div class="stat-label">आज के फॉलो-अप</div>
+                    </div>
+                </div>
+
+                <div class="stat-card success">
+                    <div class="stat-icon success">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="upcomingVisits">0</div>
+                        <div class="stat-label">आगामी विज़िट</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3 class="chart-title">गाँव के अनुसार मरीज</h3>
+                    <canvas id="villageChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3 class="chart-title">जोखिम वितरण</h3>
+                    <canvas id="riskChart"></canvas>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <button class="btn btn-primary" onclick="switchModule('add-patient')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="8.5" cy="7" r="4"></circle>
+                        <line x1="20" y1="8" x2="20" y2="14"></line>
+                        <line x1="23" y1="11" x2="17" y2="11"></line>
+                    </svg>
+                    मरीज जोड़ें
+                </button>
+                <button class="btn btn-danger" onclick="switchModule('high-risk')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    </svg>
+                    उच्च जोखिम देखें
+                </button>
+                <button class="btn btn-secondary" onclick="switchModule('calendar')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    कैलेंडर खोलें
+                </button>
+            </div>
+        </section>
+
+        <!-- Add Patient Module -->
+        <section class="module" id="add-patient">
+            <h1 class="module-title">नया मरीज जोड़ें</h1>
+            
+            <div class="voice-input-section">
+                <button class="mic-button" id="micButton" aria-label="आवाज़ रिकॉर्ड करें">
+                    <svg class="mic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                    </svg>
+                    <div class="waveform" id="waveform">
+                        <span></span><span></span><span></span><span></span><span></span>
+                    </div>
+                </button>
+                <p class="voice-instruction">माइक्रोफ़ोन पर क्लिक करें और मरीज की जानकारी बोलें</p>
+                <div class="transcription-box" id="transcriptionBox">
+                    <p class="transcription-text" id="transcriptionText">यहाँ आपकी आवाज़ दिखाई देगी...</p>
+                </div>
+            </div>
+
+            <form class="patient-form" id="patientForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="patientName">नाम *</label>
+                        <input type="text" id="patientName" required placeholder="मरीज का नाम">
+                    </div>
+                    <div class="form-group">
+                        <label for="patientAge">उम्र *</label>
+                        <input type="number" id="patientAge" required placeholder="उम्र">
+                    </div>
+                    <div class="form-group">
+                        <label for="patientVillage">गाँव *</label>
+                        <input type="text" id="patientVillage" required placeholder="गाँव का नाम">
+                    </div>
+                    <div class="form-group">
+                        <label for="patientPhone">फ़ोन नंबर</label>
+                        <input type="tel" id="patientPhone" placeholder="फ़ोन नंबर">
+                    </div>
+                    <div class="form-group">
+                        <label for="bpSystolic">रक्तचाप (सिस्टोलिक)</label>
+                        <input type="number" id="bpSystolic" placeholder="120">
+                    </div>
+                    <div class="form-group">
+                        <label for="bpDiastolic">रक्तचाप (डायस्टोलिक)</label>
+                        <input type="number" id="bpDiastolic" placeholder="80">
+                    </div>
+                    <div class="form-group">
+                        <label for="sugarLevel">शुगर स्तर</label>
+                        <input type="number" id="sugarLevel" placeholder="शुगर स्तर">
+                    </div>
+                    <div class="form-group">
+                        <label for="pregnancyStatus">गर्भावस्था स्थिति</label>
+                        <select id="pregnancyStatus">
+                            <option value="no">नहीं</option>
+                            <option value="yes">हाँ</option>
+                            <option value="na">लागू नहीं</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="symptoms">लक्षण</label>
+                    <textarea id="symptoms" rows="4" placeholder="मरीज के लक्षण यहाँ लिखें..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        सहेजें
+                    </button>
+                    <button type="reset" class="btn btn-secondary">रीसेट करें</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Search Patient Module -->
+        <section class="module" id="search-patient">
+            <h1 class="module-title">मरीज खोजें</h1>
+            
+            <div class="search-section">
+                <div class="search-bar">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <input type="text" id="searchInput" placeholder="नाम, गाँव या फ़ोन नंबर से खोजें...">
+                    <button class="voice-search-btn" id="voiceSearchBtn" aria-label="आवाज़ से खोजें">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                            <line x1="12" y1="19" x2="12" y2="23"></line>
+                            <line x1="8" y1="23" x2="16" y2="23"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="search-results" id="searchResults">
+                <p class="empty-state">मरीज खोजने के लिए ऊपर टाइप करें या आवाज़ का उपयोग करें</p>
+            </div>
+        </section>
+
+        <!-- Patient Profile Module -->
+        <section class="module" id="patient-profile">
+            <div class="profile-header">
+                <button class="btn btn-secondary" onclick="switchModule('search-patient')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    वापस जाएं
+                </button>
+                <h1 class="module-title" id="profilePatientName">मरीज प्रोफ़ाइल</h1>
+            </div>
+
+            <div class="profile-content" id="profileContent">
+                <!-- Dynamically populated -->
+            </div>
+        </section>
+
+        <!-- Calendar Module -->
+        <section class="module" id="calendar">
+            <h1 class="module-title">कैलेंडर और फॉलो-अप</h1>
+            
+            <div class="calendar-controls">
+                <button class="btn btn-primary" id="addAppointmentBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    अपॉइंटमेंट जोड़ें
+                </button>
+            </div>
+
+            <div class="calendar-view" id="calendarView">
+                <!-- Calendar will be rendered here -->
+            </div>
+
+            <div class="upcoming-appointments">
+                <h3>आगामी अपॉइंटमेंट</h3>
+                <div id="upcomingAppointmentsList">
+                    <p class="empty-state">कोई आगामी अपॉइंटमेंट नहीं</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- High Risk Patients Module -->
+        <section class="module" id="high-risk">
+            <h1 class="module-title">उच्च जोखिम मरीज</h1>
+            
+            <div class="filters">
+                <select id="villageFilter" class="filter-select">
+                    <option value="">सभी गाँव</option>
+                </select>
+                <select id="conditionFilter" class="filter-select">
+                    <option value="">सभी स्थितियाँ</option>
+                    <option value="bp">उच्च रक्तचाप</option>
+                    <option value="sugar">उच्च शुगर</option>
+                    <option value="pregnancy">गर्भावस्था</option>
+                </select>
+            </div>
+
+            <div class="high-risk-list" id="highRiskList">
+                <p class="empty-state">कोई उच्च जोखिम मरीज नहीं</p>
+            </div>
+        </section>
+
+        <!-- Insurance Module -->
+        <section class="module" id="insurance">
+            <h1 class="module-title">बीमा प्रबंधन</h1>
+            
+            <div class="insurance-info-card">
+                <h3>आयुष्मान भारत योजना</h3>
+                <p>सभी पात्र नागरिकों के लिए मुफ्त स्वास्थ्य बीमा</p>
+                <ul class="benefits-list">
+                    <li>₹5 लाख तक का कवरेज</li>
+                    <li>कैशलेस उपचार</li>
+                    <li>सभी सरकारी और निजी अस्पतालों में मान्य</li>
+                </ul>
+            </div>
+
+            <div class="insurance-search">
+                <h3>मरीज का बीमा स्टेटस जांचें</h3>
+                <div class="search-bar">
+                    <input type="text" id="insuranceSearchInput" placeholder="मरीज का नाम खोजें...">
+                    <button class="btn btn-primary">खोजें</button>
+                </div>
+            </div>
+
+            <div class="insurance-results" id="insuranceResults">
+                <p class="empty-state">मरीज खोजने के लिए नाम दर्ज करें</p>
+            </div>
+        </section>
+
+        <!-- Communication Module -->
+        <section class="module" id="communication">
+            <h1 class="module-title">संचार</h1>
+            
+            <div class="communication-tabs">
+                <button class="tab-btn active" data-tab="patient-chat">मरीज चैट</button>
+                <button class="tab-btn" data-tab="worker-group">वर्कर ग्रुप</button>
+            </div>
+
+            <div class="tab-content active" id="patient-chat">
+                <div class="chat-list">
+                    <p class="empty-state">कोई चैट नहीं</p>
+                </div>
+            </div>
+
+            <div class="tab-content" id="worker-group">
+                <div class="group-list">
+                    <p class="empty-state">कोई ग्रुप नहीं</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Transport Module -->
+        <section class="module" id="transport">
+            <h1 class="module-title">परिवहन सुविधा</h1>
+            
+            <div class="transport-search">
+                <div class="form-group">
+                    <label for="destinationInput">गंतव्य गाँव</label>
+                    <input type="text" id="destinationInput" placeholder="गाँव का नाम दर्ज करें...">
+                </div>
+                <button class="btn btn-primary">रूट खोजें</button>
+            </div>
+
+            <div class="transport-results" id="transportResults">
+                <p class="empty-state">रूट खोजने के लिए गंतव्य दर्ज करें</p>
+            </div>
+        </section>
+
+        <!-- Health Coach Module -->
+        <section class="module" id="health-coach">
+            <h1 class="module-title">स्वास्थ्य कोच</h1>
+            
+            <div class="gamification-header">
+                <div class="points-display">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                    <span id="userPoints">0</span> अंक
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="quiz-section" id="quizSection">
+                <h3>साप्ताहिक प्रश्नोत्तरी</h3>
+                <div class="quiz-questions" id="quizQuestions">
+                    <!-- Quiz questions will be rendered here -->
+                </div>
+            </div>
+
+            <div class="badges-section">
+                <h3>आपके बैज</h3>
+                <div class="badges-grid" id="badgesGrid">
+                    <p class="empty-state">अभी तक कोई बैज नहीं मिला</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reports Module -->
+        <section class="module" id="reports">
+            <h1 class="module-title">रिपोर्ट डाउनलोड करें</h1>
+            
+            <div class="report-form">
+                <div class="form-group">
+                    <label for="reportPatientSelect">मरीज चुनें</label>
+                    <select id="reportPatientSelect">
+                        <option value="">मरीज चुनें...</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" id="generateReportBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    PDF डाउनलोड करें
+                </button>
+            </div>
+
+            <div class="report-preview" id="reportPreview">
+                <p class="empty-state">रिपोर्ट देखने के लिए मरीज चुनें</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Floating Microphone Button -->
+    <button class="fab" id="fabMic" aria-label="आवाज़ कमांड">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+        </svg>
+    </button>
+
+    <!-- Modals -->
+    <div class="modal" id="appointmentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>नया अपॉइंटमेंट</h2>
+                <button class="modal-close" onclick="closeModal('appointmentModal')">&times;</button>
+            </div>
+            <form id="appointmentForm">
+                <div class="form-group">
+                    <label for="appointmentPatient">मरीज</label>
+                    <select id="appointmentPatient" required>
+                        <option value="">मरीज चुनें...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="appointmentDate">तारीख</label>
+                    <input type="date" id="appointmentDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="appointmentTime">समय</label>
+                    <input type="time" id="appointmentTime" required>
+                </div>
+                <div class="form-group">
+                    <label for="appointmentNotes">नोट्स</label>
+                    <textarea id="appointmentNotes" rows="3"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">सहेजें</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('appointmentModal')">रद्द करें</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Alert Container -->
+    <div class="alert-container" id="alertContainer"></div>
+
+    <script src="translations.js"></script>
+    <script src="voice-handler.js"></script>
+    <script src="charts.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
