@@ -1,76 +1,185 @@
+// ===================================
+// FIREBASE IMPORTS
+// ===================================
+import {
+    addPatient,
+    updatePatient,
+    deletePatient,
+    getPatient,
+    getAllPatients,
+    onPatientsChange,
+    addVisit,
+    getVisitsByPatient,
+    getAllVisits,
+    onVisitsChange,
+    addAlert,
+    getActiveAlerts,
+    acknowledgeAlert,
+    onAlertsChange,
+    addAppointment,
+    getUpcomingAppointments,
+    updateAppointment,
+    deleteAppointment
+} from './firebase-service.js';
+
+// ===================================
+// GLOBAL DATA ARRAYS (Firebase-backed)
+// ===================================
+let patients = [];
+let visits = [];
+let alerts = [];
+let appointments = [];
+
+// ===================================
 // Main Application Logic
+// ===================================
 class SwasthyaSaathiApp {
     constructor() {
         this.currentLanguage = 'hi';
         this.currentModule = 'dashboard';
-        this.patients = [];
-        this.appointments = [];
         this.voiceHandler = new VoiceHandler();
         this.chartRenderer = new ChartRenderer();
+        this.isInitialized = false;
 
         this.init();
     }
 
-    init() {
-        this.loadData();
+    async init() {
+        console.log('🚀 Initializing Swasthya Saathi with Firebase...');
+        await this.initializeApp();
         this.setupEventListeners();
-        this.renderDashboard();
-        this.updateCharts();
     }
 
     // ===================================
-    // Data Management
+    // FIREBASE INITIALIZATION (REPLACED localStorage)
     // ===================================
 
-    loadData() {
-        const savedPatients = localStorage.getItem('patients');
-        const savedAppointments = localStorage.getItem('appointments');
+    async initializeApp() {
+        console.log('📡 Loading data from Firebase...');
 
-        if (savedPatients) {
-            this.patients = JSON.parse(savedPatients);
-        } else {
-            // Demo data
-            this.patients = [
-                {
-                    id: 1,
-                    name: 'सीता देवी',
-                    age: 35,
-                    village: 'रामपुर',
-                    phone: '9876543210',
-                    bpSystolic: 140,
-                    bpDiastolic: 90,
-                    sugarLevel: 180,
-                    pregnancyStatus: 'no',
-                    symptoms: 'सिरदर्द, थकान',
-                    lastVisit: '2026-02-10',
-                    insurance: { hasCard: true, policyNumber: 'AB123456' }
-                },
-                {
-                    id: 2,
-                    name: 'राधा कुमारी',
-                    age: 28,
-                    village: 'श्यामपुर',
-                    phone: '9876543211',
-                    bpSystolic: 120,
-                    bpDiastolic: 80,
-                    sugarLevel: 95,
-                    pregnancyStatus: 'yes',
-                    symptoms: 'कोई नहीं',
-                    lastVisit: '2026-02-12',
-                    insurance: { hasCard: false }
+        // Show loading overlay
+        this.showLoadingOverlay('डेटा लोड हो रहा है...');
+
+        try {
+            // Load all data from Firebase in parallel
+            const [patientsResult, visitsResult, alertsResult, appointmentsResult] = await Promise.all([
+                getAllPatients(),
+                getAllVisits(),
+                getActiveAlerts(),
+                getUpcomingAppointments()
+            ]);
+
+            // Update global arrays
+            if (patientsResult.success) {
+                patients = patientsResult.data;
+                console.log(`✅ Loaded ${patients.length} patients`);
+            } else {
+                console.error('❌ Error loading patients:', patientsResult.error);
+            }
+
+            if (visitsResult.success) {
+                visits = visitsResult.data;
+                console.log(`✅ Loaded ${visits.length} visits`);
+            } else {
+                console.error('❌ Error loading visits:', visitsResult.error);
+            }
+
+            if (alertsResult.success) {
+                alerts = alertsResult.data;
+                console.log(`✅ Loaded ${alerts.length} alerts`);
+            } else {
+                console.error('❌ Error loading alerts:', alertsResult.error);
+            }
+
+            if (appointmentsResult.success) {
+                appointments = appointmentsResult.data;
+                console.log(`✅ Loaded ${appointments.length} appointments`);
+            } else {
+                console.error('❌ Error loading appointments:', appointmentsResult.error);
+            }
+
+            // Setup real-time listeners
+            this.setupRealtimeListeners();
+
+            // Initialize UI
+            this.renderDashboard();
+            this.updateCharts();
+
+            // Hide loading
+            this.hideLoadingOverlay();
+
+            this.isInitialized = true;
+            console.log('✅ App initialized successfully with Firebase!');
+
+        } catch (error) {
+            console.error('❌ Error initializing app:', error);
+            this.hideLoadingOverlay();
+            this.showErrorNotification('डेटा लोड करने में त्रुटि: ' + error.message);
+        }
+    }
+
+    // ===================================
+    // REAL-TIME LISTENERS (NEW)
+    // ===================================
+
+    setupRealtimeListeners() {
+        console.log('👂 Setting up real-time Firebase listeners...');
+
+        // Listen to patient changes
+        onPatientsChange((result) => {
+            if (result.success) {
+                console.log('🔄 Patients updated:', result.data.length);
+                const oldCount = patients.length;
+                patients = result.data;
+
+                // Update UI
+                this.renderDashboard();
+                this.updateCharts();
+
+                // Show notification if new patient added
+                if (patients.length > oldCount) {
+                    this.showSuccessNotification('✅ नया मरीज जोड़ा गया!');
                 }
-            ];
-            this.saveData();
-        }
+            }
+        });
 
-        if (savedAppointments) {
-            this.appointments = JSON.parse(savedAppointments);
-        }
-    }
+        // Listen to visit changes (WhatsApp recordings)
+        onVisitsChange((result) => {
+            if (result.success) {
+                console.log('🔄 Visits updated:', result.data.length);
+                const oldCount = visits.length;
+                visits = result.data;
 
-    saveData() {
-        localStorage.setItem('patients', JSON.stringify(this.patients));
-        localStorage.setItem('appointments', JSON.stringify(this.appointments));
+                // If new visit added, show notification
+                if (visits.length > oldCount) {
+                    this.showSuccessNotification('🎤 नई रिकॉर्डिंग प्राप्त हुई!');
+                }
+            }
+        });
+
+        // Listen to alert changes
+        onAlertsChange((result) => {
+            if (result.success) {
+                console.log('🔄 Alerts updated:', result.data.length);
+
+                const newAlerts = result.data;
+                const oldUnacknowledged = alerts.filter(a => !a.acknowledged).length;
+                const newUnacknowledged = newAlerts.filter(a => !a.acknowledged).length;
+
+                alerts = newAlerts;
+
+                // If new unacknowledged alert, play sound and show notification
+                if (newUnacknowledged > oldUnacknowledged) {
+                    this.playAlertSound();
+                    this.showWarningNotification('⚠️ नया आपातकालीन अलर्ट!');
+                }
+
+                // Update dashboard
+                this.renderDashboard();
+            }
+        });
+
+        console.log('✅ Real-time listeners active');
     }
 
     // ===================================
@@ -111,7 +220,7 @@ class SwasthyaSaathiApp {
         if (patientForm) {
             patientForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                this.addPatient();
+                this.savePatient();
             });
         }
 
@@ -160,7 +269,7 @@ class SwasthyaSaathiApp {
         if (appointmentForm) {
             appointmentForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                this.addAppointment();
+                this.saveAppointment();
             });
         }
 
@@ -225,19 +334,23 @@ class SwasthyaSaathiApp {
     // ===================================
 
     renderDashboard() {
-        const totalPatients = this.patients.length;
-        const highRiskPatients = this.patients.filter(p =>
-            this.chartRenderer.assessRisk(p) === 'high'
+        const totalPatients = patients.length;
+        const highRiskPatients = patients.filter(p =>
+            this.assessRisk(p) === 'HIGH'
         ).length;
 
         const today = new Date().toISOString().split('T')[0];
-        const todayFollowups = this.appointments.filter(a =>
-            a.date === today
-        ).length;
+        const todayFollowups = appointments.filter(a => {
+            if (!a.date) return false;
+            const aptDate = a.date.toDate ? a.date.toDate().toISOString().split('T')[0] : a.date;
+            return aptDate === today;
+        }).length;
 
-        const upcomingVisits = this.appointments.filter(a =>
-            new Date(a.date) > new Date()
-        ).length;
+        const upcomingVisits = appointments.filter(a => {
+            if (!a.date) return false;
+            const aptDate = a.date.toDate ? a.date.toDate() : new Date(a.date);
+            return aptDate > new Date();
+        }).length;
 
         document.getElementById('totalPatients').textContent = totalPatients;
         document.getElementById('highRiskPatients').textContent = highRiskPatients;
@@ -246,12 +359,12 @@ class SwasthyaSaathiApp {
     }
 
     updateCharts() {
-        const { villageData, riskData } = this.chartRenderer.calculateStats(this.patients);
+        const { villageData, riskData } = this.chartRenderer.calculateStats(patients);
         this.chartRenderer.updateCharts(villageData, riskData);
     }
 
     // ===================================
-    // Add Patient
+    // Add Patient (FIREBASE VERSION)
     // ===================================
 
     toggleVoiceInput(button) {
@@ -286,40 +399,74 @@ class SwasthyaSaathiApp {
         if (data.sugarLevel) document.getElementById('sugarLevel').value = data.sugarLevel;
     }
 
-    addPatient() {
-        const patient = {
-            id: Date.now(),
+    async savePatient() {
+        console.log('💾 Saving patient to Firebase...');
+
+        // Get form data
+        const bpSystolic = parseInt(document.getElementById('bpSystolic').value) || 0;
+        const bpDiastolic = parseInt(document.getElementById('bpDiastolic').value) || 0;
+        const sugarLevel = parseInt(document.getElementById('sugarLevel').value) || 0;
+        const isPregnant = document.getElementById('pregnancyStatus').value === 'yes';
+
+        const patientData = {
             name: document.getElementById('patientName').value,
             age: parseInt(document.getElementById('patientAge').value),
             village: document.getElementById('patientVillage').value,
             phone: document.getElementById('patientPhone').value,
-            bpSystolic: parseInt(document.getElementById('bpSystolic').value) || 0,
-            bpDiastolic: parseInt(document.getElementById('bpDiastolic').value) || 0,
-            sugarLevel: parseInt(document.getElementById('sugarLevel').value) || 0,
+            bpSystolic,
+            bpDiastolic,
+            sugarLevel,
             pregnancyStatus: document.getElementById('pregnancyStatus').value,
             symptoms: document.getElementById('symptoms').value,
-            lastVisit: new Date().toISOString().split('T')[0],
             insurance: { hasCard: false }
         };
 
-        this.patients.push(patient);
-        this.saveData();
+        // Calculate risk level
+        patientData.riskLevel = this.calculateRiskLevel(bpSystolic, bpDiastolic, sugarLevel, isPregnant);
 
-        const risk = this.chartRenderer.assessRisk(patient);
+        // Show loading state
+        const submitBtn = document.querySelector('#patientForm button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner"></span> सहेज रहे हैं...';
 
-        this.showAlert('success', 'मरीज सफलतापूर्वक जोड़ा गया');
+        try {
+            // Save to Firebase
+            const result = await addPatient(patientData);
 
-        if (risk === 'high') {
-            setTimeout(() => {
-                this.showAlert('danger', 'उच्च जोखिम मरीज का पता चला!');
-            }, 500);
+            if (result.success) {
+                console.log('✅ Patient saved:', result.data.id);
+
+                // Success notification
+                this.showSuccessNotification('✅ मरीज सफलतापूर्वक जोड़ा गया!');
+
+                // If high risk, show warning
+                if (patientData.riskLevel === 'HIGH') {
+                    setTimeout(() => {
+                        this.showWarningNotification('⚠️ यह उच्च जोखिम मरीज है!');
+                    }, 500);
+                }
+
+                // Reset form
+                document.getElementById('patientForm').reset();
+                document.getElementById('transcriptionText').textContent = 'यहाँ आपकी आवाज़ दिखाई देगी...';
+
+                // Navigate back to dashboard after delay
+                setTimeout(() => {
+                    this.switchModule('dashboard');
+                }, 1500);
+
+            } else {
+                throw new Error(result.error);
+            }
+
+        } catch (error) {
+            console.error('❌ Error saving patient:', error);
+            this.showErrorNotification('❌ त्रुटि: मरीज सहेजने में समस्या');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
         }
-
-        document.getElementById('patientForm').reset();
-        document.getElementById('transcriptionText').textContent = 'यहाँ आपकी आवाज़ दिखाई देगी...';
-
-        this.renderDashboard();
-        this.updateCharts();
     }
 
     // ===================================
@@ -327,7 +474,7 @@ class SwasthyaSaathiApp {
     // ===================================
 
     searchPatients(query) {
-        const results = this.patients.filter(p =>
+        const results = patients.filter(p =>
             p.name.toLowerCase().includes(query.toLowerCase()) ||
             p.village.toLowerCase().includes(query.toLowerCase()) ||
             (p.phone && p.phone.includes(query))
@@ -345,18 +492,23 @@ class SwasthyaSaathiApp {
         }
 
         container.innerHTML = results.map(patient => {
-            const risk = this.chartRenderer.assessRisk(patient);
+            const risk = this.assessRisk(patient);
+            const riskLabel = risk === 'HIGH' ? 'उच्च' : risk === 'MEDIUM' ? 'मध्यम' : 'कम';
+            const lastVisit = patient.updated_at ?
+                new Date(patient.updated_at.seconds * 1000).toLocaleDateString('hi-IN') :
+                'N/A';
+
             return `
-                <div class="patient-card" onclick="app.viewPatientProfile(${patient.id})">
+                <div class="patient-card" onclick="app.viewPatientProfile('${patient.id}')">
                     <div class="patient-card-header">
                         <div class="patient-name">${patient.name}</div>
-                        <span class="risk-badge ${risk}">${risk === 'high' ? 'उच्च' : risk === 'medium' ? 'मध्यम' : 'कम'}</span>
+                        <span class="risk-badge ${risk.toLowerCase()}">${riskLabel}</span>
                     </div>
                     <div class="patient-info">
                         <div>गाँव: ${patient.village}</div>
                         <div>उम्र: ${patient.age} वर्ष</div>
-                        <div>BP: ${patient.bpSystolic}/${patient.bpDiastolic}</div>
-                        <div>अंतिम विज़िट: ${patient.lastVisit}</div>
+                        <div>BP: ${patient.blood_pressure?.systolic || patient.bpSystolic}/${patient.blood_pressure?.diastolic || patient.bpDiastolic}</div>
+                        <div>अंतिम विज़िट: ${lastVisit}</div>
                     </div>
                 </div>
             `;
@@ -364,7 +516,7 @@ class SwasthyaSaathiApp {
     }
 
     voiceSearch() {
-        this.showAlert('warning', 'आवाज़ खोज सक्रिय...');
+        this.showWarningNotification('आवाज़ खोज सक्रिय...');
         // Implement voice search similar to voice input
     }
 
@@ -373,28 +525,31 @@ class SwasthyaSaathiApp {
     // ===================================
 
     viewPatientProfile(patientId) {
-        const patient = this.patients.find(p => p.id === patientId);
+        const patient = patients.find(p => p.id === patientId);
         if (!patient) return;
 
-        const risk = this.chartRenderer.assessRisk(patient);
-        const riskLabel = risk === 'high' ? 'उच्च जोखिम' : risk === 'medium' ? 'मध्यम जोखिम' : 'कम जोखिम';
+        const risk = this.assessRisk(patient);
+        const riskLabel = risk === 'HIGH' ? 'उच्च जोखिम' : risk === 'MEDIUM' ? 'मध्यम जोखिम' : 'कम जोखिम';
+        const lastVisit = patient.updated_at ?
+            new Date(patient.updated_at.seconds * 1000).toLocaleDateString('hi-IN') :
+            'N/A';
 
         const profileContent = `
             <div class="patient-card">
                 <div class="patient-card-header">
                     <div class="patient-name">${patient.name}</div>
-                    <span class="risk-badge ${risk}">${riskLabel}</span>
+                    <span class="risk-badge ${risk.toLowerCase()}">${riskLabel}</span>
                 </div>
                 <div class="patient-info">
                     <div><strong>उम्र:</strong> ${patient.age} वर्ष</div>
                     <div><strong>गाँव:</strong> ${patient.village}</div>
                     <div><strong>फ़ोन:</strong> ${patient.phone || 'N/A'}</div>
-                    <div><strong>रक्तचाप:</strong> ${patient.bpSystolic}/${patient.bpDiastolic}</div>
-                    <div><strong>शुगर:</strong> ${patient.sugarLevel}</div>
-                    <div><strong>गर्भावस्था:</strong> ${patient.pregnancyStatus === 'yes' ? 'हाँ' : 'नहीं'}</div>
+                    <div><strong>रक्तचाप:</strong> ${patient.blood_pressure?.systolic || patient.bpSystolic}/${patient.blood_pressure?.diastolic || patient.bpDiastolic}</div>
+                    <div><strong>शुगर:</strong> ${patient.sugar_level || patient.sugarLevel}</div>
+                    <div><strong>गर्भावस्था:</strong> ${patient.is_pregnant || patient.pregnancyStatus === 'yes' ? 'हाँ' : 'नहीं'}</div>
                     <div><strong>लक्षण:</strong> ${patient.symptoms}</div>
-                    <div><strong>अंतिम विज़िट:</strong> ${patient.lastVisit}</div>
-                    <div><strong>बीमा:</strong> ${patient.insurance.hasCard ? 'हाँ' : 'नहीं'}</div>
+                    <div><strong>अंतिम विज़िट:</strong> ${lastVisit}</div>
+                    <div><strong>बीमा:</strong> ${patient.insurance_status !== 'NONE' ? 'हाँ' : 'नहीं'}</div>
                 </div>
             </div>
         `;
@@ -409,8 +564,8 @@ class SwasthyaSaathiApp {
     // ===================================
 
     renderHighRiskPatients() {
-        const highRiskPatients = this.patients.filter(p =>
-            this.chartRenderer.assessRisk(p) === 'high'
+        const highRiskPatients = patients.filter(p =>
+            this.assessRisk(p) === 'HIGH'
         );
 
         const container = document.getElementById('highRiskList');
@@ -421,15 +576,15 @@ class SwasthyaSaathiApp {
         }
 
         container.innerHTML = highRiskPatients.map(patient => `
-            <div class="patient-card" onclick="app.viewPatientProfile(${patient.id})">
+            <div class="patient-card" onclick="app.viewPatientProfile('${patient.id}')">
                 <div class="patient-card-header">
                     <div class="patient-name">${patient.name}</div>
                     <span class="risk-badge high">उच्च जोखिम</span>
                 </div>
                 <div class="patient-info">
                     <div>गाँव: ${patient.village}</div>
-                    <div>BP: ${patient.bpSystolic}/${patient.bpDiastolic}</div>
-                    <div>शुगर: ${patient.sugarLevel}</div>
+                    <div>BP: ${patient.blood_pressure?.systolic || patient.bpSystolic}/${patient.blood_pressure?.diastolic || patient.bpDiastolic}</div>
+                    <div>शुगर: ${patient.sugar_level || patient.sugarLevel}</div>
                     <div>फ़ोन: ${patient.phone || 'N/A'}</div>
                 </div>
             </div>
@@ -437,14 +592,20 @@ class SwasthyaSaathiApp {
     }
 
     // ===================================
-    // Calendar & Appointments
+    // Calendar & Appointments (FIREBASE VERSION)
     // ===================================
 
     renderCalendar() {
         const container = document.getElementById('upcomingAppointmentsList');
-        const upcoming = this.appointments.filter(a =>
-            new Date(a.date) >= new Date()
-        ).sort((a, b) => new Date(a.date) - new Date(b.date));
+        const upcoming = appointments.filter(a => {
+            if (!a.date) return false;
+            const aptDate = a.date.toDate ? a.date.toDate() : new Date(a.date);
+            return aptDate >= new Date();
+        }).sort((a, b) => {
+            const dateA = a.date.toDate ? a.date.toDate() : new Date(a.date);
+            const dateB = b.date.toDate ? b.date.toDate() : new Date(b.date);
+            return dateA - dateB;
+        });
 
         if (upcoming.length === 0) {
             container.innerHTML = '<p class="empty-state">कोई आगामी अपॉइंटमेंट नहीं</p>';
@@ -452,12 +613,14 @@ class SwasthyaSaathiApp {
         }
 
         container.innerHTML = upcoming.map(apt => {
-            const patient = this.patients.find(p => p.id === apt.patientId);
+            const patient = patients.find(p => p.id === apt.patient_id);
+            const aptDate = apt.date.toDate ? apt.date.toDate().toLocaleDateString('hi-IN') : apt.date;
+
             return `
                 <div class="patient-card">
-                    <div class="patient-name">${patient ? patient.name : 'Unknown'}</div>
+                    <div class="patient-name">${patient ? patient.name : apt.patient_name || 'Unknown'}</div>
                     <div class="patient-info">
-                        <div>तारीख: ${apt.date}</div>
+                        <div>तारीख: ${aptDate}</div>
                         <div>समय: ${apt.time}</div>
                         <div>नोट्स: ${apt.notes || 'कोई नहीं'}</div>
                     </div>
@@ -469,26 +632,39 @@ class SwasthyaSaathiApp {
         const select = document.getElementById('appointmentPatient');
         if (select) {
             select.innerHTML = '<option value="">मरीज चुनें...</option>' +
-                this.patients.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+                patients.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
         }
     }
 
-    addAppointment() {
-        const appointment = {
-            id: Date.now(),
-            patientId: parseInt(document.getElementById('appointmentPatient').value),
+    async saveAppointment() {
+        console.log('💾 Saving appointment to Firebase...');
+
+        const appointmentData = {
+            patient_id: document.getElementById('appointmentPatient').value,
+            patient_name: patients.find(p => p.id === document.getElementById('appointmentPatient').value)?.name || '',
             date: document.getElementById('appointmentDate').value,
             time: document.getElementById('appointmentTime').value,
             notes: document.getElementById('appointmentNotes').value
         };
 
-        this.appointments.push(appointment);
-        this.saveData();
+        try {
+            const result = await addAppointment(appointmentData);
 
-        this.showAlert('success', 'अपॉइंटमेंट निर्धारित किया गया');
-        this.closeModal('appointmentModal');
-        this.renderCalendar();
-        this.renderDashboard();
+            if (result.success) {
+                console.log('✅ Appointment saved:', result.data.id);
+                this.showSuccessNotification('✅ अपॉइंटमेंट निर्धारित किया गया');
+                this.closeModal('appointmentModal');
+                document.getElementById('appointmentForm').reset();
+                this.renderCalendar();
+                this.renderDashboard();
+            } else {
+                throw new Error(result.error);
+            }
+
+        } catch (error) {
+            console.error('❌ Error saving appointment:', error);
+            this.showErrorNotification('❌ अपॉइंटमेंट सहेजने में समस्या');
+        }
     }
 
     // ===================================
@@ -499,17 +675,18 @@ class SwasthyaSaathiApp {
         const select = document.getElementById('reportPatientSelect');
         if (select) {
             select.innerHTML = '<option value="">मरीज चुनें...</option>' +
-                this.patients.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+                patients.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
         }
     }
 
     previewReport(patientId) {
         if (!patientId) return;
 
-        const patient = this.patients.find(p => p.id == patientId);
+        const patient = patients.find(p => p.id === patientId);
         if (!patient) return;
 
-        const risk = this.chartRenderer.assessRisk(patient);
+        const risk = this.assessRisk(patient);
+        const riskLabel = risk === 'HIGH' ? 'उच्च' : risk === 'MEDIUM' ? 'मध्यम' : 'कम';
         const preview = document.getElementById('reportPreview');
 
         preview.innerHTML = `
@@ -518,10 +695,10 @@ class SwasthyaSaathiApp {
                 <div class="patient-info">
                     <div><strong>उम्र:</strong> ${patient.age}</div>
                     <div><strong>गाँव:</strong> ${patient.village}</div>
-                    <div><strong>जोखिम स्तर:</strong> ${risk === 'high' ? 'उच्च' : risk === 'medium' ? 'मध्यम' : 'कम'}</div>
-                    <div><strong>रक्तचाप:</strong> ${patient.bpSystolic}/${patient.bpDiastolic}</div>
-                    <div><strong>शुगर:</strong> ${patient.sugarLevel}</div>
-                    <div><strong>बीमा:</strong> ${patient.insurance.hasCard ? 'हाँ' : 'नहीं'}</div>
+                    <div><strong>जोखिम स्तर:</strong> ${riskLabel}</div>
+                    <div><strong>रक्तचाप:</strong> ${patient.blood_pressure?.systolic || patient.bpSystolic}/${patient.blood_pressure?.diastolic || patient.bpDiastolic}</div>
+                    <div><strong>शुगर:</strong> ${patient.sugar_level || patient.sugarLevel}</div>
+                    <div><strong>बीमा:</strong> ${patient.insurance_status !== 'NONE' ? 'हाँ' : 'नहीं'}</div>
                 </div>
             </div>
         `;
@@ -530,12 +707,48 @@ class SwasthyaSaathiApp {
     generateReport() {
         const patientId = document.getElementById('reportPatientSelect').value;
         if (!patientId) {
-            this.showAlert('warning', 'कृपया मरीज चुनें');
+            this.showWarningNotification('कृपया मरीज चुनें');
             return;
         }
 
-        this.showAlert('success', 'PDF डाउनलोड हो रहा है...');
+        this.showSuccessNotification('PDF डाउनलोड हो रहा है...');
         // In production, integrate jsPDF or server-side PDF generation
+    }
+
+    // ===================================
+    // Risk Assessment (Updated for Firebase schema)
+    // ===================================
+
+    assessRisk(patient) {
+        // Handle both Firebase and old schema
+        const bpSystolic = patient.blood_pressure?.systolic || patient.bpSystolic || 0;
+        const bpDiastolic = patient.blood_pressure?.diastolic || patient.bpDiastolic || 0;
+        const sugar = patient.sugar_level || patient.sugarLevel || 0;
+        const isPregnant = patient.is_pregnant || patient.pregnancyStatus === 'yes';
+
+        // Use Firebase risk_level if available
+        if (patient.risk_level) {
+            return patient.risk_level;
+        }
+
+        // Otherwise calculate
+        return this.calculateRiskLevel(bpSystolic, bpDiastolic, sugar, isPregnant);
+    }
+
+    calculateRiskLevel(bpSystolic, bpDiastolic, sugar, isPregnant) {
+        let score = 0;
+
+        if (bpSystolic > 140 || bpDiastolic > 90) score += 2;
+        else if (bpSystolic > 130 || bpDiastolic > 85) score += 1;
+
+        if (sugar > 200) score += 2;
+        else if (sugar > 140) score += 1;
+
+        if (isPregnant) score += 1;
+
+        if (score >= 3) return 'HIGH';
+        if (score >= 1) return 'MEDIUM';
+        return 'LOW';
     }
 
     // ===================================
@@ -553,7 +766,109 @@ class SwasthyaSaathiApp {
     }
 
     // ===================================
-    // Alerts
+    // UI Helper Functions (NEW)
+    // ===================================
+
+    showLoadingOverlay(message = 'लोड हो रहा है...') {
+        const overlay = document.createElement('div');
+        overlay.id = 'loading-overlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            color: white;
+        `;
+        overlay.innerHTML = `
+            <div class="spinner" style="
+                border: 4px solid rgba(255,255,255,0.3);
+                border-top: 4px solid white;
+                border-radius: 50%;
+                width: 50px;
+                height: 50px;
+                animation: spin 1s linear infinite;
+            "></div>
+            <p style="margin-top: 20px; font-size: 18px;">${message}</p>
+        `;
+        document.body.appendChild(overlay);
+
+        // Add spinner animation
+        if (!document.getElementById('spinner-style')) {
+            const style = document.createElement('style');
+            style.id = 'spinner-style';
+            style.textContent = `
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+
+    hideLoadingOverlay() {
+        const overlay = document.getElementById('loading-overlay');
+        if (overlay) {
+            overlay.remove();
+        }
+    }
+
+    showSuccessNotification(message) {
+        this.showNotification(message, 'success');
+    }
+
+    showErrorNotification(message) {
+        this.showNotification(message, 'error');
+    }
+
+    showWarningNotification(message) {
+        this.showNotification(message, 'warning');
+    }
+
+    showNotification(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `notification notification-${type}`;
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : '#ff9800'};
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 10001;
+            animation: slideIn 0.3s ease-out;
+            font-family: 'Noto Sans Devanagari', sans-serif;
+        `;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    playAlertSound() {
+        try {
+            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+            audio.volume = 0.5;
+            audio.play().catch(err => console.log('Could not play sound:', err));
+        } catch (error) {
+            console.log('Audio not supported');
+        }
+    }
+
+    // ===================================
+    // Alerts (Keep existing system)
     // ===================================
 
     showAlert(type, message) {
@@ -581,12 +896,14 @@ class SwasthyaSaathiApp {
     // ===================================
 
     handleFABVoiceCommand() {
-        this.showAlert('warning', 'आवाज़ कमांड सुन रहा हूँ...');
+        this.showWarningNotification('आवाज़ कमांड सुन रहा हूँ...');
         // Implement global voice commands
     }
 }
 
-// Global function for onclick handlers
+// ===================================
+// Global functions for onclick handlers
+// ===================================
 function switchModule(moduleName) {
     if (window.app) {
         window.app.switchModule(moduleName);
@@ -599,7 +916,12 @@ function closeModal(modalId) {
     }
 }
 
+// ===================================
 // Initialize app when DOM is ready
+// ===================================
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🎯 DOM loaded, initializing app...');
     window.app = new SwasthyaSaathiApp();
 });
+
+console.log('📦 App.js module loaded (Firebase version)');

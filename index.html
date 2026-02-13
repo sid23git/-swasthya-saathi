@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="hi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,9 +8,12 @@
     <meta name="description" content="Vernacular Voice Assistant for ASHA Workers">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <!-- Header -->
     <header class="header">
@@ -21,7 +25,9 @@
             </button>
             <div class="logo">
                 <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    <path
+                        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                    </path>
                 </svg>
                 <span class="logo-text">स्वास्थ्य साथी</span>
             </div>
@@ -86,7 +92,8 @@
             </a>
             <a href="#high-risk" class="nav-item" data-module="high-risk">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                    </path>
                     <line x1="12" y1="9" x2="12" y2="13"></line>
                     <line x1="12" y1="17" x2="12.01" y2="17"></line>
                 </svg>
@@ -137,7 +144,7 @@
         <!-- Dashboard Module -->
         <section class="module active" id="dashboard">
             <h1 class="module-title">डैशबोर्ड</h1>
-            
+
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon primary">
@@ -157,7 +164,9 @@
                 <div class="stat-card danger">
                     <div class="stat-icon danger">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <path
+                                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                            </path>
                             <line x1="12" y1="9" x2="12" y2="13"></line>
                             <line x1="12" y1="17" x2="12.01" y2="17"></line>
                         </svg>
@@ -217,7 +226,9 @@
                 </button>
                 <button class="btn btn-danger" onclick="switchModule('high-risk')">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <path
+                            d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                        </path>
                     </svg>
                     उच्च जोखिम देखें
                 </button>
@@ -236,7 +247,7 @@
         <!-- Add Patient Module -->
         <section class="module" id="add-patient">
             <h1 class="module-title">नया मरीज जोड़ें</h1>
-            
+
             <div class="voice-input-section">
                 <button class="mic-button" id="micButton" aria-label="आवाज़ रिकॉर्ड करें">
                     <svg class="mic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -313,7 +324,7 @@
         <!-- Search Patient Module -->
         <section class="module" id="search-patient">
             <h1 class="module-title">मरीज खोजें</h1>
-            
+
             <div class="search-section">
                 <div class="search-bar">
                     <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -358,7 +369,7 @@
         <!-- Calendar Module -->
         <section class="module" id="calendar">
             <h1 class="module-title">कैलेंडर और फॉलो-अप</h1>
-            
+
             <div class="calendar-controls">
                 <button class="btn btn-primary" id="addAppointmentBtn">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -384,7 +395,7 @@
         <!-- High Risk Patients Module -->
         <section class="module" id="high-risk">
             <h1 class="module-title">उच्च जोखिम मरीज</h1>
-            
+
             <div class="filters">
                 <select id="villageFilter" class="filter-select">
                     <option value="">सभी गाँव</option>
@@ -405,7 +416,7 @@
         <!-- Insurance Module -->
         <section class="module" id="insurance">
             <h1 class="module-title">बीमा प्रबंधन</h1>
-            
+
             <div class="insurance-info-card">
                 <h3>आयुष्मान भारत योजना</h3>
                 <p>सभी पात्र नागरिकों के लिए मुफ्त स्वास्थ्य बीमा</p>
@@ -432,7 +443,7 @@
         <!-- Communication Module -->
         <section class="module" id="communication">
             <h1 class="module-title">संचार</h1>
-            
+
             <div class="communication-tabs">
                 <button class="tab-btn active" data-tab="patient-chat">मरीज चैट</button>
                 <button class="tab-btn" data-tab="worker-group">वर्कर ग्रुप</button>
@@ -454,7 +465,7 @@
         <!-- Transport Module -->
         <section class="module" id="transport">
             <h1 class="module-title">परिवहन सुविधा</h1>
-            
+
             <div class="transport-search">
                 <div class="form-group">
                     <label for="destinationInput">गंतव्य गाँव</label>
@@ -471,11 +482,13 @@
         <!-- Health Coach Module -->
         <section class="module" id="health-coach">
             <h1 class="module-title">स्वास्थ्य कोच</h1>
-            
+
             <div class="gamification-header">
                 <div class="points-display">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        <polygon
+                            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                        </polygon>
                     </svg>
                     <span id="userPoints">0</span> अंक
                 </div>
@@ -502,7 +515,7 @@
         <!-- Reports Module -->
         <section class="module" id="reports">
             <h1 class="module-title">रिपोर्ट डाउनलोड करें</h1>
-            
+
             <div class="report-form">
                 <div class="form-group">
                     <label for="reportPatientSelect">मरीज चुनें</label>
@@ -564,7 +577,8 @@
                 </div>
                 <div class="modal-actions">
                     <button type="submit" class="btn btn-primary">सहेजें</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('appointmentModal')">रद्द करें</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('appointmentModal')">रद्द
+                        करें</button>
                 </div>
             </form>
         </div>
@@ -573,9 +587,26 @@
     <!-- Alert Container -->
     <div class="alert-container" id="alertContainer"></div>
 
+    <!-- Firebase SDK v9 Modular -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Make Firebase available globally for debugging
+        window.firebaseLoaded = true;
+        console.log('🔥 Firebase SDK loaded');
+    </script>
+
+    <!-- Firebase Configuration and Services -->
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="firebase-service.js"></script>
+
+    <!-- Application Scripts -->
     <script src="translations.js"></script>
     <script src="voice-handler.js"></script>
     <script src="charts.js"></script>
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
+
 </html>
